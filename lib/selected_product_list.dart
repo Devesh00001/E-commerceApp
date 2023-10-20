@@ -12,7 +12,7 @@ class SelectedProductList extends ChangeNotifier {
     notifyListeners();
   }
 
-  void alladd(Product obj) {
+  void aladd(Product obj) {
     allList = obj;
     notifyListeners();
   }

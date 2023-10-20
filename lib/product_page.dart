@@ -139,7 +139,7 @@ class _ProductPageState extends State<ProductPage> {
                               onTap: () {
                                 context
                                     .read<SelectedProductList>()
-                                    .alladd(ProductList[index]);
+                                    .aladd(ProductList[index]);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
