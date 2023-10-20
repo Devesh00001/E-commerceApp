@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider_example/product.dart';
 import 'package:provider_example/product_page.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_example/selected_product_list.dart';
 
-void main() {
-  runApp(const MyApp());
+Box? box;
+void main() async {
+  Hive.registerAdapter(ProductAdapter());
+  await Hive.initFlutter();
+  box = await Hive.openBox<Product>("productbox");
+
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => SelectedProductList())
+  ], child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -13,18 +23,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => SelectedProductList())
-      ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        home: const ProductPage(),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
+      home: ProductPage(),
     );
   }
 }

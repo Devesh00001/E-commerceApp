@@ -3,6 +3,7 @@ import 'package:provider_example/product.dart';
 import 'package:provider_example/selected_product_list.dart';
 import 'package:provider/provider.dart';
 import 'package:readmore/readmore.dart';
+import 'package:flutter/services.dart';
 
 class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({super.key});
@@ -10,6 +11,8 @@ class ProductDetailPage extends StatefulWidget {
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
 }
+
+const platform = MethodChannel("toast.flutter.io/toast");
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
@@ -164,6 +167,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       )),
                   onTap: () {
                     setState(() {
+                      platform.invokeMethod("showToast");
                       context
                           .read<SelectedProductList>()
                           .add(product.image, product.price);

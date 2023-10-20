@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider_example/main.dart';
 import 'package:provider_example/product_detail_page.dart';
 import 'package:provider_example/selected_product_list.dart';
 import 'package:shimmer/shimmer.dart';
@@ -20,26 +23,40 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   bool isLoading = true; // Set to true to show the shimmer initially
   List<Product> ProductList = [];
+
   String api = "https://fakestoreapi.com/products";
 
   Future<void> fetchProduct() async {
-    try {
-      final response = await http.get(Uri.parse(api));
-      if (response.statusCode == 200) {
-        print(response.body);
-        List responseJson = json.decode(response.body.toString());
+    var result = await Connectivity().checkConnectivity();
+    if (result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi) {
+      try {
+        final response = await http.get(Uri.parse(api));
+        if (response.statusCode == 200) {
+          print(response.body);
+          List responseJson = json.decode(response.body.toString());
 
-        ProductList = createProductList(responseJson);
+          ProductList = createProductList(responseJson);
 
-        // Data is loaded, so set isLoading to false to stop shimmer
-        setState(() {
-          isLoading = false;
-        });
-      } else {
-        print("Error in calling API");
+          // Data is loaded, so set isLoading to false to stop shimmer
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          print("Error in calling API");
+        }
+      } catch (e) {
+        print("Error: $e");
       }
-    } catch (e) {
-      print("Error: $e");
+      print("Internet connection is from Mobile data");
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      final productsBox = await Hive.openBox<Product>("productbox");
+      ProductList = productsBox.values.toList();
+
+      print("not connected");
     }
   }
 
@@ -53,11 +70,13 @@ class _ProductPageState extends State<ProductPage> {
       String category = data[i]['category'];
       String image = data[i]['image'];
       Map<String, dynamic> rating = data[i]['rating'];
+
       Product product =
           Product(id, title, price, description, category, image, rating);
+      box!.clear();
+      box!.put(i, product);
       list.add(product);
     }
-
     return list;
   }
 
