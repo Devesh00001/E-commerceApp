@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider_example/product.dart';
 import 'package:provider_example/selected_product_list.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,7 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 const platform = MethodChannel("toast.flutter.io/toast");
+const flashLightplatform = MethodChannel("flashlight");
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
@@ -34,101 +36,117 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             child: Stack(
           children: [
             Positioned(
-              top: 200,
+              top: 150.h,
               left: 0,
               right: 0,
-              bottom: 0,
+              bottom: 40.h,
               child: Container(
-                height: 700,
-                width: 410,
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                 decoration: BoxDecoration(
                     border: Border.all(
                         color: const Color.fromARGB(255, 182, 182, 182)),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20.r),
+                        topRight: Radius.circular(20.r)),
                     color: Colors.white),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          product.title,
-                          style: const TextStyle(
-                              fontSize: 25, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Container(
-                        height: 40,
-                        width: 150,
-                        padding: const EdgeInsets.all(2),
-                        margin: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                                color:
-                                    const Color.fromARGB(255, 182, 182, 182))),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              color: Color.fromARGB(255, 194, 240, 142),
-                            ),
-                            Text(
-                              ' ${product.rating['rate']}',
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w500),
-                            ),
-                            Text('  ${product.rating['count']} reviews',
-                                style: const TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w200))
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 60,
-                        margin: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: const Color.fromARGB(255, 223, 223, 223)),
-                        child: ListTile(
-                          leading: Text(
-                            '\$ ${product.price}',
-                            style: const TextStyle(fontSize: 20),
+                child: ListView(children: [
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 8.h),
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            product.title,
+                            style: TextStyle(
+                                fontSize: 15.sp, fontWeight: FontWeight.bold),
                           ),
-                          trailing: const Text("Emi available",
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w200)),
                         ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(8, 8, 8, 4),
-                        child: Text("Product Detail : ",
-                            style: TextStyle(fontSize: 15)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 8, 8),
-                        child: ReadMoreText(
-                          product.description,
-                          style: const TextStyle(fontSize: 15),
-                          trimLines: 4,
-                          trimMode: TrimMode.Line,
-                          lessStyle: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
-                          moreStyle: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                        Container(
+                          height: 20.h,
+                          width: 100.w,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 2.w, vertical: 2.h),
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 8.h),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(
+                                  color: const Color.fromARGB(
+                                      255, 182, 182, 182))),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                size: 10.h,
+                                Icons.star,
+                                color: const Color.fromARGB(255, 194, 240, 142),
+                              ),
+                              Text(
+                                ' ${product.rating['rate']}',
+                                style: TextStyle(
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              Text('  ${product.rating['count']} reviews',
+                                  style: TextStyle(
+                                      fontSize: 8.sp,
+                                      fontWeight: FontWeight.w200))
+                            ],
+                          ),
                         ),
-                      ),
-                    ]),
+                        Container(
+                          height: 30.h,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 8.h),
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 8.h),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8.r),
+                              color: const Color.fromARGB(255, 223, 223, 223)),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '\$ ${product.price}',
+                                  style: TextStyle(fontSize: 10.sp),
+                                ),
+                                Text("Emi available",
+                                    style: TextStyle(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w200)),
+                              ]),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 4.h),
+                          child: Text("Product Detail : ",
+                              style: TextStyle(fontSize: 15.sp)),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(16.w, 0, 8.w, 8.h),
+                          child: ReadMoreText(
+                            product.description,
+                            style: TextStyle(fontSize: 12.sp),
+                            trimLines: 4,
+                            trimMode: TrimMode.Line,
+                            lessStyle: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                            moreStyle: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ]),
+                ]),
               ),
             ),
             Positioned(
               top: 0,
               child: Container(
-                height: 200,
+                height: 150.h,
                 width: MediaQuery.of(context).size.width,
                 alignment: Alignment.center,
                 child: Hero(
@@ -146,28 +164,29 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             Positioned(
               bottom: 0,
               child: Container(
-                height: 100,
+                height: 50.h,
                 width: MediaQuery.of(context).size.width,
                 alignment: Alignment.center,
                 // ignore: prefer_const_constructors
                 decoration: BoxDecoration(color: Colors.white),
                 child: GestureDetector(
                   child: Container(
-                      height: 50,
-                      width: 300,
+                      height: 30.h,
+                      width: 200.w,
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 165, 229, 75),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text("Add To Cart",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20)),
+                                fontWeight: FontWeight.bold, fontSize: 15.sp)),
                       )),
                   onTap: () {
                     setState(() {
                       platform.invokeMethod("showToast");
+                      flashLightplatform.invokeListMethod("flashlight");
                       context
                           .read<SelectedProductList>()
                           .add(product.image, product.price);

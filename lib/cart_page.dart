@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:provider_example/selected_product_list.dart';
 import 'package:provider/provider.dart';
@@ -30,30 +31,35 @@ class _CartPageState extends State<CartPage> {
                 return Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
-                      margin: const EdgeInsets.all(10),
-                      height: 80,
-                      width: 300,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                      margin: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 10.h),
+                      height: 40.h,
+                      width: 250.w,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: const [
+                        borderRadius: BorderRadius.circular(10.r),
+                        boxShadow: [
                           BoxShadow(
                             color: Colors.grey, //New
-                            blurRadius: 10.0,
+                            blurRadius: 10.0.r,
                           )
                         ],
                       ),
-                      child: ListTile(
-                        leading: FadeInImage(
-                            image: NetworkImage(list[index].image),
-                            placeholder:
-                                const AssetImage("assets/images/picture.png"),
-                            imageErrorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.image);
-                            }),
-                        trailing: Text(list[index].price.toString()),
-                      ),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            FadeInImage(
+                                image: NetworkImage(list[index].image),
+                                placeholder: const AssetImage(
+                                    "assets/images/picture.png"),
+                                imageErrorBuilder:
+                                    (context, error, stackTrace) {
+                                  return const Icon(Icons.image);
+                                }),
+                            Text("\$${list[index].price}"),
+                          ]),
                     ),
                     GestureDetector(
                       onTap: () {
@@ -61,17 +67,16 @@ class _CartPageState extends State<CartPage> {
                         setState(() {});
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(8),
-                        margin: const EdgeInsets.fromLTRB(10, 10, 0, 10),
-                        height: 80,
-                        width: 70,
+                        margin: EdgeInsets.fromLTRB(10.w, 10.h, 0, 10.h),
+                        height: 40.h,
+                        width: 80.w,
                         decoration: BoxDecoration(
                           color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: const [
+                          borderRadius: BorderRadius.circular(10.r),
+                          boxShadow: [
                             BoxShadow(
                               color: Colors.grey, //New
-                              blurRadius: 10.0,
+                              blurRadius: 10.0.r,
                             )
                           ],
                         ),

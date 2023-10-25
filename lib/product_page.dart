@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider_example/main.dart';
@@ -22,7 +23,7 @@ class ProductPage extends StatefulWidget {
 
 class _ProductPageState extends State<ProductPage> {
   bool isLoading = true; // Set to true to show the shimmer initially
-  List<Product> ProductList = [];
+  List<Product> productList = [];
 
   String api = "https://fakestoreapi.com/products";
 
@@ -33,35 +34,30 @@ class _ProductPageState extends State<ProductPage> {
       try {
         final response = await http.get(Uri.parse(api));
         if (response.statusCode == 200) {
-          print(response.body);
           List responseJson = json.decode(response.body.toString());
 
-          ProductList = createProductList(responseJson);
+          productList = createProductList(responseJson);
 
           // Data is loaded, so set isLoading to false to stop shimmer
           setState(() {
             isLoading = false;
           });
-        } else {
-          print("Error in calling API");
-        }
+        } else {}
       } catch (e) {
         print("Error: $e");
       }
-      print("Internet connection is from Mobile data");
     } else {
       setState(() {
         isLoading = false;
       });
       final productsBox = await Hive.openBox<Product>("productbox");
-      ProductList = productsBox.values.toList();
-
-      print("not connected");
+      productList = productsBox.values.toList();
     }
   }
 
   List<Product> createProductList(List data) {
     List<Product> list = [];
+    box!.clear();
     for (int i = 0; i < data.length; i++) {
       String title = data[i]["title"];
       int id = data[i]["id"];
@@ -73,7 +69,7 @@ class _ProductPageState extends State<ProductPage> {
 
       Product product =
           Product(id, title, price, description, category, image, rating);
-      box!.clear();
+
       box!.put(i, product);
       list.add(product);
     }
@@ -117,8 +113,8 @@ class _ProductPageState extends State<ProductPage> {
                     Colors.black,
                     Colors.grey[100]!,
                   ],
-                  begin: Alignment(-1.0, -0.3),
-                  end: Alignment(1.0, 0.3),
+                  begin: const Alignment(-1.0, -0.3),
+                  end: const Alignment(1.0, 0.3),
                 ),
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -139,18 +135,17 @@ class _ProductPageState extends State<ProductPage> {
                 ),
               )
             : Container(
-                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                padding: EdgeInsets.fromLTRB(20.w, 0, 0, 0),
                 child: GridView.builder(
-                    itemCount: ProductList.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 200,
-                            childAspectRatio: 3 / 3.5,
-                            mainAxisSpacing: 20,
-                            crossAxisSpacing: 20),
+                    itemCount: productList.length,
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 200.w,
+                        childAspectRatio: 3 / 3.5,
+                        mainAxisSpacing: 20.h,
+                        crossAxisSpacing: 20.w),
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8.h),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -158,7 +153,7 @@ class _ProductPageState extends State<ProductPage> {
                               onTap: () {
                                 context
                                     .read<SelectedProductList>()
-                                    .aladd(ProductList[index]);
+                                    .aladd(productList[index]);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -168,18 +163,18 @@ class _ProductPageState extends State<ProductPage> {
                                 );
                               },
                               child: Hero(
-                                tag: ProductList[index].image,
+                                tag: productList[index].image,
                                 child: Container(
-                                  height: 120,
-                                  width: 150,
-                                  padding: const EdgeInsets.all(10),
+                                  height: 90.h,
+                                  width: 120.w,
+                                  padding: EdgeInsets.all(10.h),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(10.r),
                                   ),
                                   child: FadeInImage(
                                       image: NetworkImage(
-                                          ProductList[index].image),
+                                          productList[index].image),
                                       placeholder: const AssetImage(
                                           "assets/images/picture.png"),
                                       imageErrorBuilder:
@@ -195,24 +190,26 @@ class _ProductPageState extends State<ProductPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
-                                      width: 150,
-                                      padding: const EdgeInsets.all(4),
+                                      width: 150.w,
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 4.w),
                                       child: ReadMoreText(
-                                        ProductList[index].title,
-                                        style: const TextStyle(
+                                        productList[index].title,
+                                        style: TextStyle(
+                                            fontSize: 10.sp,
                                             fontWeight: FontWeight.bold),
                                         trimLines: 2,
                                         trimMode: TrimMode.Line,
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5),
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 5.w),
                                       child: Text(
-                                        "\$ ${ProductList[index].price}",
-                                        style: const TextStyle(
+                                        "\$ ${productList[index].price}",
+                                        style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 25,
+                                            fontSize: 10.sp,
                                             color: Colors.lightGreen),
                                       ),
                                     )
