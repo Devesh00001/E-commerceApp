@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider_example/notifi_service.dart';
 import 'package:provider_example/product.dart';
 import 'package:provider_example/selected_product_list.dart';
 import 'package:provider/provider.dart';
@@ -185,7 +186,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       )),
                   onTap: () {
                     setState(() {
-                      platform.invokeMethod("showToast");
+                      NotificationService().showNotification(
+                          title: "add to cart", body: product.title);
+                      // platform.invokeMethod("showToast");
                       flashLightplatform.invokeListMethod("flashlight");
                       context
                           .read<SelectedProductList>()
