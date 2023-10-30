@@ -1,6 +1,10 @@
+import 'dart:math';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin notificationService =
       FlutterLocalNotificationsPlugin();
 
@@ -22,15 +26,65 @@ class NotificationService {
             (NotificationResponse notificationResponse) async {});
   }
 
-  NotificationDetails? notificationDetails() {
-    return const NotificationDetails(
-        android: AndroidNotificationDetails('channelId', 'channelName',
+  void requestNotificationPermission() async {
+    NotificationSettings settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        announcement: true,
+        carPlay: true,
+        criticalAlert: true,
+        provisional: true);
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print("User granted permission");
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      print("User granted provisional authorization");
+    } else {
+      print("User denied permission");
+    }
+  }
+
+  NotificationDetails notificationDetails() {
+    AndroidNotificationChannel channel = AndroidNotificationChannel(
+        Random.secure().nextInt(1000000).toString(), "hight importance",
+        importance: Importance.max);
+
+    return NotificationDetails(
+        android: AndroidNotificationDetails(
+            channel.id.toString(), channel.name.toString(),
             importance: Importance.max, icon: "icon_flutter"),
         iOS: DarwinNotificationDetails());
   }
 
-  Future showNotification(
+  Future showNotification(RemoteMessage message) async {
+    return notificationService.show(0, message.notification!.title.toString(),
+        message.notification!.body.toString(), notificationDetails());
+  }
+
+  Future showSecheduleNotification(
       {int id = 0, String? title, String? body, String? payLoad}) async {
-    return notificationService.show(id, title, body, notificationDetails());
+    return notificationService.periodicallyShow(
+        id, title, body, RepeatInterval.everyMinute, notificationDetails());
+  }
+
+  Future<String> getDeviceToken() async {
+    String? token = await messaging.getToken();
+    return token!;
+  }
+
+  void isTokenRefresh() async {
+    messaging.onTokenRefresh.listen((event) {
+      event.toString();
+    });
+  }
+
+  void firebaseInit() async {
+    FirebaseMessaging.onMessage.listen((message) {
+      print(message.notification!.title.toString());
+      print(message.notification!.body.toString());
+      showNotification(message);
+    });
   }
 }

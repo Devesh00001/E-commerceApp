@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider_example/main.dart';
+import 'package:provider_example/notifi_service.dart';
 import 'package:provider_example/product_detail_page.dart';
 import 'package:provider_example/selected_product_list.dart';
 import 'package:shimmer/shimmer.dart';
@@ -76,8 +77,17 @@ class _ProductPageState extends State<ProductPage> {
     return list;
   }
 
+  NotificationService service = NotificationService();
+
   @override
   void initState() {
+    service.firebaseInit();
+    service.isTokenRefresh();
+    service.requestNotificationPermission();
+    service.getDeviceToken().then((value) {
+      print("Device Token:");
+      print(value);
+    });
     super.initState();
     fetchProduct();
   }

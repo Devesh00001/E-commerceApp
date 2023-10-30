@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,14 +11,26 @@ import 'package:provider/provider.dart';
 import 'package:provider_example/selected_product_list.dart';
 
 Box? box;
-void main() async {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+
+  await Firebase.initializeApp();
+
   Hive.registerAdapter(ProductAdapter());
   await Hive.initFlutter();
   box = await Hive.openBox<Product>("productbox");
 
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => SelectedProductList())
-  ], child: MyApp()));
+  ], child: const MyApp()));
+}
+
+@pragma("vm:entry-point")
+Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  print(message.notification!.title.toString());
 }
 
 class MyApp extends StatelessWidget {

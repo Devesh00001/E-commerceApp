@@ -186,8 +186,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       )),
                   onTap: () {
                     setState(() {
-                      NotificationService().showNotification(
-                          title: "add to cart", body: product.title);
+                      // NotificationService().showNotification(
+                      //     title: "add to cart", body: product.title);
+
                       // platform.invokeMethod("showToast");
                       flashLightplatform.invokeListMethod("flashlight");
                       context
