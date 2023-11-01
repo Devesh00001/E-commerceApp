@@ -1,6 +1,6 @@
 # provider_example
 
-A new Flutter project.
+A e-commerce app where i use flutter-channels, Hive database, Provider,firebase notification,local notification and notification from Node API 
 
 ## Getting Started
 
