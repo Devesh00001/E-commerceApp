@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:provider_example/utils.dart';
 
 class NotificationService {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -46,28 +47,63 @@ class NotificationService {
     }
   }
 
-  NotificationDetails notificationDetails() {
-    AndroidNotificationChannel channel = AndroidNotificationChannel(
-        Random.secure().nextInt(1000000).toString(), "hight importance",
-        importance: Importance.max);
+  Future notificationDetails(String bigPicture, String largesIcon) async {
+    if (bigPicture != "" && largesIcon != "") {
+      final largeIconPath = await Utils.downloadFile(
+        largesIcon,
+        'largeIcon',
+      );
 
-    return NotificationDetails(
-        android: AndroidNotificationDetails(
-            channel.id.toString(), channel.name.toString(),
-            importance: Importance.max, icon: "icon_flutter"),
-        iOS: DarwinNotificationDetails());
+      final bigPicturePath = await Utils.downloadFile(
+        bigPicture,
+        'BigPicher',
+      );
+
+      final styleInformation = BigPictureStyleInformation(
+          FilePathAndroidBitmap(bigPicturePath),
+          largeIcon: FilePathAndroidBitmap(largeIconPath));
+
+      AndroidNotificationChannel channel = AndroidNotificationChannel(
+          Random.secure().nextInt(1000000).toString(), "your_channel",
+          importance: Importance.max);
+
+      return NotificationDetails(
+          android: AndroidNotificationDetails(
+              channel.id.toString(), channel.name.toString(),
+              importance: Importance.max,
+              icon: "icon_flutter",
+              styleInformation: styleInformation),
+          iOS: const DarwinNotificationDetails());
+    } else {
+      AndroidNotificationChannel channel = AndroidNotificationChannel(
+          Random.secure().nextInt(1000000).toString(), "your_channel",
+          importance: Importance.max);
+
+      return NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id.toString(),
+            channel.name.toString(),
+            importance: Importance.max,
+            icon: "icon_flutter",
+          ),
+          iOS: const DarwinNotificationDetails());
+    }
   }
 
   Future showNotification(RemoteMessage message) async {
-    return notificationService.show(0, message.notification!.title.toString(),
-        message.notification!.body.toString(), notificationDetails());
+    return notificationService.show(
+        0,
+        message.notification!.title.toString(),
+        message.notification!.body.toString(),
+        await notificationDetails(
+            message.data['bigimage'] ?? "", message.data['largeimage'] ?? ""));
   }
 
-  Future showSecheduleNotification(
-      {int id = 0, String? title, String? body, String? payLoad}) async {
-    return notificationService.periodicallyShow(
-        id, title, body, RepeatInterval.everyMinute, notificationDetails());
-  }
+  // Future showSecheduleNotification(
+  //     {int id = 0, String? title, String? body, String? payLoad}) async {
+  //   return notificationService.periodicallyShow(id, title, body,
+  //       RepeatInterval.everyMinute, await notificationDetails(message.data['bigimage'], message.data['largeimage']));
+  // }
 
   Future<String> getDeviceToken() async {
     String? token = await messaging.getToken();

@@ -41,6 +41,7 @@ dependencies:
   flutter_screenutil: ^5.9.0
   device_preview: ^1.1.0
   flutter_local_notifications: ^13.0.0
+  basic_utils: ^5.7.0
   
  
 
