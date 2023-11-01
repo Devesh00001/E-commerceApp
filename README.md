@@ -8,21 +8,21 @@ This project is a starting point for a Flutter application.
 
 A few resources to get you started if this is your first Flutter project:
 
-  http: ^1.1.0
-  provider: ^6.0.5  
-  readmore: ^2.2.0
-  shimmer: ^3.0.0
-  connectivity_plus: ^5.0.1
-  hive: ^2.2.3
-  hive_flutter: any
-  path_provider: ^2.1.1
-  flutter_screenutil: ^5.9.0
-  device_preview: ^1.1.0
-  flutter_local_notifications: ^13.0.0
-  basic_utils: ^5.7.0
-  cupertino_icons: ^1.0.2
-  firebase_core: ^2.20.0
-  firebase_messaging: ^14.7.2
+flutter pub get http:1.1.0
+flutter pub get provider:6.0.5
+flutter pub get readmore:2.2.0
+flutter pub get shimmer:3.0.0
+flutter pub get connectivity_plus:5.0.1
+flutter pub get hive:2.2.3
+flutter pub get hive_flutter:any
+flutter pub get path_provider:2.1.1
+flutter pub get flutter_screenutil:5.9.0
+flutter pub get device_preview:1.1.0
+flutter pub get flutter_local_notifications:13.0.0
+flutter pub get basic_utils:5.7.0
+flutter pub get cupertino_icons:1.0.2
+flutter pub get firebase_core:2.20.0
+flutter pub get firebase_messaging:14.7.2
 
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
