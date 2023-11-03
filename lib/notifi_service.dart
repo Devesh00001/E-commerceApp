@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:provider_example/cart_page.dart';
 import 'package:provider_example/utils.dart';
 
 class NotificationService {
@@ -9,22 +12,20 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin notificationService =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> initNotification() async {
+  Future<void> initNotification(BuildContext context, message) async {
     AndroidInitializationSettings initializationAndroidSetting =
         const AndroidInitializationSettings('icon_flutter');
 
-    var intializationSettingsIOS = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-        onDidReceiveLocalNotification: (id, title, body, payload) {});
+    var intializationSettingsIOS = const DarwinInitializationSettings();
 
     var intializationSettings = InitializationSettings(
         android: initializationAndroidSetting, iOS: intializationSettingsIOS);
 
     await notificationService.initialize(intializationSettings,
-        onDidReceiveBackgroundNotificationResponse:
-            (NotificationResponse notificationResponse) async {});
+        onDidReceiveNotificationResponse: (payload) {
+      // handle interaction when app is active for android
+      handleMessage(context, message);
+    });
   }
 
   void requestNotificationPermission() async {
@@ -47,56 +48,70 @@ class NotificationService {
     }
   }
 
-  Future notificationDetails(String bigPicture, String largesIcon) async {
-    if (bigPicture != "" && largesIcon != "") {
+  Future<void> showNotification(RemoteMessage message) async {
+    //for ios
+    const DarwinNotificationDetails darwinNotificationDetails =
+        DarwinNotificationDetails(
+            presentAlert: true, presentBadge: true, presentSound: true);
+
+    //for Android
+    AndroidNotificationDetails androidNotificationDetails;
+
+    //data has images
+    if (message.data['bigimage'] != null &&
+        message.data['largeimage'] != null) {
+      //download image
       final largeIconPath = await Utils.downloadFile(
-        largesIcon,
+        message.data['largeimage'],
         'largeIcon',
       );
 
+      //download image
       final bigPicturePath = await Utils.downloadFile(
-        bigPicture,
+        message.data['bigimage'],
         'BigPicher',
       );
-
+      print(message.notification!.android!.channelId.toString());
       final styleInformation = BigPictureStyleInformation(
           FilePathAndroidBitmap(bigPicturePath),
           largeIcon: FilePathAndroidBitmap(largeIconPath));
 
+      //Android notification channel
       AndroidNotificationChannel channel = AndroidNotificationChannel(
-          Random.secure().nextInt(1000000).toString(), "your_channel",
-          importance: Importance.max);
+          message.notification!.android!.channelId.toString(),
+          message.notification!.android!.channelId.toString(),
+          importance: Importance.max,
+          showBadge: true,
+          playSound: true,
+          sound: const RawResourceAndroidNotificationSound('jetsons_doorbell'));
 
-      return NotificationDetails(
-          android: AndroidNotificationDetails(
-              channel.id.toString(), channel.name.toString(),
-              importance: Importance.max,
-              icon: "icon_flutter",
-              styleInformation: styleInformation),
-          iOS: const DarwinNotificationDetails());
+      //Android notifcation details
+      androidNotificationDetails = AndroidNotificationDetails(
+          channel.id.toString(), channel.name.toString(),
+          importance: Importance.max,
+          icon: "icon_flutter",
+          styleInformation: styleInformation,
+          priority: Priority.max);
     } else {
       AndroidNotificationChannel channel = AndroidNotificationChannel(
-          Random.secure().nextInt(1000000).toString(), "your_channel",
-          importance: Importance.max);
+          message.notification!.android!.channelId.toString(),
+          message.notification!.android!.channelId.toString(),
+          importance: Importance.max,
+          showBadge: true,
+          playSound: true,
+          sound: const RawResourceAndroidNotificationSound('jetsons_doorbell'));
 
-      return NotificationDetails(
-          android: AndroidNotificationDetails(
-            channel.id.toString(),
-            channel.name.toString(),
-            importance: Importance.max,
-            icon: "icon_flutter",
-          ),
-          iOS: const DarwinNotificationDetails());
+      androidNotificationDetails = AndroidNotificationDetails(
+          channel.id.toString(), channel.name.toString(),
+          importance: Importance.max,
+          icon: "icon_flutter",
+          priority: Priority.max);
     }
-  }
+    NotificationDetails notificationDetails = NotificationDetails(
+        android: androidNotificationDetails, iOS: darwinNotificationDetails);
 
-  Future showNotification(RemoteMessage message) async {
-    return notificationService.show(
-        0,
-        message.notification!.title.toString(),
-        message.notification!.body.toString(),
-        await notificationDetails(
-            message.data['bigimage'] ?? "", message.data['largeimage'] ?? ""));
+    notificationService.show(0, message.notification!.title.toString(),
+        message.notification!.body.toString(), notificationDetails);
   }
 
   // Future showSecheduleNotification(
@@ -116,11 +131,41 @@ class NotificationService {
     });
   }
 
-  void firebaseInit() async {
+  void firebaseInit(BuildContext context) async {
     FirebaseMessaging.onMessage.listen((message) {
       print(message.notification!.title.toString());
       print(message.notification!.body.toString());
+      print(message.data['page']);
+      if (Platform.isAndroid) {
+        print("android");
+        initNotification(context, message);
+        showNotification(message);
+      }
       showNotification(message);
     });
+  }
+
+  Future<void> setupInteractMessage(BuildContext context) async {
+    //when app is terminated
+    RemoteMessage? intialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+
+    if (intialMessage != null) {
+      // ignore: use_build_context_synchronously
+      handleMessage(context, intialMessage);
+    }
+
+    //when app in background
+    FirebaseMessaging.onMessageOpenedApp.listen((event) {
+      handleMessage(context, event);
+    });
+  }
+
+  //ontap on notification when app is open
+  void handleMessage(BuildContext context, RemoteMessage message) {
+    if (message.data['page'] == 'order') {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => CartPage()));
+    }
   }
 }

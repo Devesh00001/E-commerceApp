@@ -25,21 +25,7 @@ class MainActivity: FlutterActivity() {
     private var cameraManager: CameraManager? = null
      var Flash:Boolean = false;
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "your_channel",
-                "Your Channel Name",
-                NotificationManager.IMPORTANCE_MAX // Set importance to high (max)
-            )
-
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
    
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {

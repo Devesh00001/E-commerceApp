@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -81,8 +82,9 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   void initState() {
-    service.firebaseInit();
+    service.firebaseInit(context);
     service.isTokenRefresh();
+    service.setupInteractMessage(context);
     service.requestNotificationPermission();
     service.getDeviceToken().then((value) {
       print("Device Token:");
