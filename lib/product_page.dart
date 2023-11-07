@@ -1,19 +1,16 @@
-import 'dart:convert';
-
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:provider_example/main.dart';
-import 'package:provider_example/notifi_service.dart';
-import 'package:provider_example/product_detail_page.dart';
-import 'package:provider_example/selected_product_list.dart';
-import 'package:shimmer/shimmer.dart';
-import 'cart_page.dart';
-import 'product.dart';
 import 'package:provider/provider.dart';
+import 'package:provider_example/product_service.dart';
+import 'package:shimmer/shimmer.dart';
+import 'product.dart';
+import 'selected_product_list.dart';
+import 'cart_page.dart';
+import 'product_detail_page.dart';
+
+import 'notifi_service.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:readmore/readmore.dart';
 
 class ProductPage extends StatefulWidget {
@@ -26,57 +23,8 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   bool isLoading = true; // Set to true to show the shimmer initially
   List<Product> productList = [];
-
-  String api = "https://fakestoreapi.com/products";
-
-  Future<void> fetchProduct() async {
-    var result = await Connectivity().checkConnectivity();
-    if (result == ConnectivityResult.mobile ||
-        result == ConnectivityResult.wifi) {
-      try {
-        final response = await http.get(Uri.parse(api));
-        if (response.statusCode == 200) {
-          List responseJson = json.decode(response.body.toString());
-
-          productList = createProductList(responseJson);
-
-          // Data is loaded, so set isLoading to false to stop shimmer
-          setState(() {
-            isLoading = false;
-          });
-        } else {}
-      } catch (e) {
-        print("Error: $e");
-      }
-    } else {
-      setState(() {
-        isLoading = false;
-      });
-      final productsBox = await Hive.openBox<Product>("productbox");
-      productList = productsBox.values.toList();
-    }
-  }
-
-  List<Product> createProductList(List data) {
-    List<Product> list = [];
-    box!.clear();
-    for (int i = 0; i < data.length; i++) {
-      String title = data[i]["title"];
-      int id = data[i]["id"];
-      dynamic price = data[i]["price"];
-      String description = data[i]['description'];
-      String category = data[i]['category'];
-      String image = data[i]['image'];
-      Map<String, dynamic> rating = data[i]['rating'];
-
-      Product product =
-          Product(id, title, price, description, category, image, rating);
-
-      box!.put(i, product);
-      list.add(product);
-    }
-    return list;
-  }
+  final productService =
+      ProductService(); // Create an instance of ProductService
 
   NotificationService service = NotificationService();
 
@@ -91,11 +39,16 @@ class _ProductPageState extends State<ProductPage> {
       print(value);
     });
     super.initState();
-    fetchProduct();
+    productService.fetchProduct(productList, isLoading).then((value) {
+      setState(() {
+        isLoading = value;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    print(isLoading);
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 244, 244, 244),
       floatingActionButton: FloatingActionButton(
