@@ -10,11 +10,14 @@ import 'package:provider_example/product.dart';
 import 'package:provider_example/product_page.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_example/selected_product_list.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 Box? box;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+  Stripe.publishableKey =
+      'pk_test_51OA5VDSF5l2QMOmHoqYPN7DBV6ZpRgkKZ7L65k26tQoBllr1C44epptJ1i5rNEraFLAMg5gOHCMSAic0ud63tktO008ROjkoO0';
 
   await Firebase.initializeApp();
 

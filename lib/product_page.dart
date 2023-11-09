@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_example/product_service.dart';
@@ -48,7 +47,6 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(isLoading);
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 244, 244, 244),
       floatingActionButton: FloatingActionButton(

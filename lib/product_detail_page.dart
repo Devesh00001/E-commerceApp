@@ -188,8 +188,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       // NotificationService().showNotification(
                       //     title: "add to cart", body: product.title);
 
-                      // platform.invokeMethod("showToast");
-                      flashLightplatform.invokeListMethod("flashlight");
+                      platform.invokeMethod("showToast");
+                      // flashLightplatform.invokeListMethod("flashlight");
                       context
                           .read<SelectedProductList>()
                           .add(product.image, product.price);
