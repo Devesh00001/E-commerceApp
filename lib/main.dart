@@ -11,15 +11,27 @@ import 'package:provider_example/product_page.dart';
 import 'package:provider/provider.dart';
 import 'package:provider_example/selected_product_list.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'firebase_options.dart';
 
 Box? box;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
-  Stripe.publishableKey =
-      'pk_test_51OA5VDSF5l2QMOmHoqYPN7DBV6ZpRgkKZ7L65k26tQoBllr1C44epptJ1i5rNEraFLAMg5gOHCMSAic0ud63tktO008ROjkoO0';
 
-  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+  // Stripe.publishableKey =
+  //     'pk_test_51OA5VDSF5l2QMOmHoqYPN7DBV6ZpRgkKZ7L65k26tQoBllr1C44epptJ1i5rNEraFLAMg5gOHCMSAic0ud63tktO008ROjkoO0';
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // await Firebase.initializeApp(
+  //     name: "provider_example",
+  //     options: const FirebaseOptions(
+  //         apiKey: "AIzaSyC3NlZdhSIsjdmH_ZO1yONQJ4Fw1-xZ_88",
+  //         authDomain: "e-commerce-bdc67.firebaseapp.com",
+  //         projectId: "e-commerce-bdc67",
+  //         storageBucket: "e-commerce-bdc67.appspot.com",
+  //         messagingSenderId: "956782711879",
+  //         appId: "1:956782711879:web:207208107d9b2a341c4d62",
+  //         measurementId: "G-NT28WKZ5Z2"));
 
   Hive.registerAdapter(ProductAdapter());
   await Hive.initFlutter();

@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider_example/cart_page.dart';
+import 'package:provider_example/stripe_payment_service.dart';
 import 'package:provider_example/utils.dart';
 
 class NotificationService {
@@ -162,9 +163,10 @@ class NotificationService {
 
   //ontap on notification when app is open
   void handleMessage(BuildContext context, RemoteMessage message) {
+       final StripePayment = StripePaymentService();
     if (message.data['page'] == 'order') {
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => CartPage()));
+          context, MaterialPageRoute(builder: (context) => CartPage(StripePaymentS: StripePayment,)));
     }
   }
 }

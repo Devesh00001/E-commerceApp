@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:provider_example/main.dart';
 import 'package:provider_example/product.dart';
 
+
 class ProductService {
   final String api = "https://fakestoreapi.com/products";
 
