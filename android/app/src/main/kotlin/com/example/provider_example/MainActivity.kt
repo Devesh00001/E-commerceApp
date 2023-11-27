@@ -8,6 +8,7 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Bundle
+
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
@@ -22,12 +23,18 @@ class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "toast.flutter.io/toast"
     private val CHANNEL2 = "flashlight"
 
+    
+
+
     private var cameraManager: CameraManager? = null
     private var flash = false
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine)  {
         super.configureFlutterEngine(flutterEngine)
+        
+        
+
 
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -82,4 +89,5 @@ class MainActivity : FlutterFragmentActivity() {
             }
         }
     }
+   
 }
