@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive/hive.dart';
+
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
-import 'package:provider_example/cart_page.dart';
+
 import 'package:provider_example/main.dart';
 import 'package:provider_example/product.dart';
 import 'package:provider_example/product_page.dart';

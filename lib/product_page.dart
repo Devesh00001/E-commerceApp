@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:provider_example/background_page.dart';
+
 import 'package:provider_example/product_service.dart';
 import 'package:provider_example/stripe_payment_service.dart';
 
@@ -10,7 +10,6 @@ import 'selected_product_list.dart';
 import 'cart_page.dart';
 import 'product_detail_page.dart';
 
-import 'notifi_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:readmore/readmore.dart';
@@ -28,19 +27,10 @@ class _ProductPageState extends State<ProductPage> {
   final productService =
       ProductService(); // Create an instance of ProductService
 
-  NotificationService service = NotificationService();
   bool isWeb = false;
 
   @override
   void initState() {
-    service.firebaseInit(context);
-    service.isTokenRefresh();
-    service.setupInteractMessage(context);
-    service.requestNotificationPermission();
-    service.getDeviceToken().then((value) {
-      print("Device Token:");
-      print(value);
-    });
     super.initState();
     productService.fetchProduct(productList, isLoading).then((value) {
       setState(() {

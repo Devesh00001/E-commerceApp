@@ -1,7 +1,10 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:floating/floating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:provider_example/product.dart';
 import 'package:provider_example/selected_product_list.dart';
 import 'package:provider/provider.dart';
@@ -25,20 +28,74 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   late Floating floating;
   bool isPipAvalable = false;
   late VideoPlayerController _controller;
+  String? deviceToken;
 
   @override
   void initState() {
     super.initState();
     floating = Floating();
     requestPipAvalable();
+    getDeviceToken();
     _controller = VideoPlayerController.networkUrl(Uri.parse(
-        'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'))
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'))
       ..initialize().then((_) {
         _controller.setLooping(true);
         _controller.play();
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
       });
+  }
+
+  Future<void> getDeviceToken() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    QuerySnapshot querySnapshot = await firestore
+        .collection('users')
+        .where('username', isEqualTo: "Devesh Choudhary")
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final DocumentSnapshot document = querySnapshot.docs.first;
+      final Map<String, dynamic>? data =
+          document.data() as Map<String, dynamic>?;
+      final String? _deviceToken = data?['Device token'];
+      // await Future.delayed(Duration(milliseconds: 100));
+      if (_deviceToken != null) {
+        setState(() {
+          deviceToken = _deviceToken;
+        });
+      }
+    }
+  }
+
+  void sendNotificationToAnotherUser() async {
+    var data = {
+      "to": deviceToken,
+      'priority': 'high',
+      'notification': {
+        'title': 'Devesh your friend is buying something',
+        'body': 'ram laal add product in cart',
+      },
+      'android': {
+        'notification': {
+          'channelId': "High_important_channel",
+          'image': "https://loremflickr.com/320/240",
+          'priority': "MAX"
+        }
+      },
+      'data': {
+        'page': "order",
+        'bigimage': "https://loremflickr.com/320/240",
+        'largeimage': "https://loremflickr.com/g/320/240/paris",
+        'channelId': "High_important_channel",
+      },
+    };
+    await http.post(Uri.parse("https://fcm.googleapis.com/fcm/send"),
+        body: jsonEncode(data),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization":
+              "key=AAAA3sSxlEc:APA91bHhlDGG58GK_yuRohMs6yRtPtNOMHOYfqcZt3Z6uJz3EjCE0h65kH8DZPA0mBAlF8vEfYvSeNuG61jybmgjk5esT_ht-pH8yprAfrqgJaUHGNTCmTyDdwf5DCUVdGMBsBoDIV7D",
+        });
   }
 
   Widget justVideo() {
@@ -77,10 +134,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     Color.fromARGB(255, 165, 229, 75), //change your color here
               )),
           floatingActionButton: FloatingActionButton(
-              child: const Icon(Icons.picture_in_picture),
               onPressed: isPipAvalable
-                  ? () => floating.enable(aspectRatio: Rational.landscape())
-                  : null),
+                  ? () =>
+                      floating.enable(aspectRatio: const Rational.landscape())
+                  : null,
+              child: const Icon(Icons.picture_in_picture)),
           body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
             if (constraints.maxWidth < 500) {
               isWeb = false;
@@ -262,7 +320,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         setState(() {
                           // NotificationService().showNotification(
                           //     title: "add to cart", body: product.title);
-
+                          sendNotificationToAnotherUser();
                           platform.invokeMethod("showToast");
                           // flashLightplatform.invokeListMethod("flashlight");
                           context

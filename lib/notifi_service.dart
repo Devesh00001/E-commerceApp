@@ -163,10 +163,14 @@ class NotificationService {
 
   //ontap on notification when app is open
   void handleMessage(BuildContext context, RemoteMessage message) {
-       final StripePayment = StripePaymentService();
+    final StripePayment = StripePaymentService();
     if (message.data['page'] == 'order') {
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => CartPage(StripePaymentS: StripePayment,)));
+          context,
+          MaterialPageRoute(
+              builder: (context) => CartPage(
+                    StripePaymentS: StripePayment,
+                  )));
     }
   }
 }
