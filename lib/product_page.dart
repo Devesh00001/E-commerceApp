@@ -1,13 +1,17 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:provider_example/product_detail_page.dart';
-import 'package:provider_example/selected_product_list.dart';
-import 'package:shimmer/shimmer.dart';
-import 'cart_page.dart';
-import 'product.dart';
 import 'package:provider/provider.dart';
+
+import 'package:provider_example/product_service.dart';
+import 'package:provider_example/stripe_payment_service.dart';
+
+import 'package:shimmer/shimmer.dart';
+import 'product.dart';
+import 'selected_product_list.dart';
+import 'cart_page.dart';
+import 'product_detail_page.dart';
+
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:readmore/readmore.dart';
 
 class ProductPage extends StatefulWidget {
@@ -19,52 +23,20 @@ class ProductPage extends StatefulWidget {
 
 class _ProductPageState extends State<ProductPage> {
   bool isLoading = true; // Set to true to show the shimmer initially
-  List<Product> ProductList = [];
-  String api = "https://fakestoreapi.com/products";
+  List<Product> productList = [];
+  final productService =
+      ProductService(); // Create an instance of ProductService
 
-  Future<void> fetchProduct() async {
-    try {
-      final response = await http.get(Uri.parse(api));
-      if (response.statusCode == 200) {
-        print(response.body);
-        List responseJson = json.decode(response.body.toString());
-
-        ProductList = createProductList(responseJson);
-
-        // Data is loaded, so set isLoading to false to stop shimmer
-        setState(() {
-          isLoading = false;
-        });
-      } else {
-        print("Error in calling API");
-      }
-    } catch (e) {
-      print("Error: $e");
-    }
-  }
-
-  List<Product> createProductList(List data) {
-    List<Product> list = [];
-    for (int i = 0; i < data.length; i++) {
-      String title = data[i]["title"];
-      int id = data[i]["id"];
-      dynamic price = data[i]["price"];
-      String description = data[i]['description'];
-      String category = data[i]['category'];
-      String image = data[i]['image'];
-      Map<String, dynamic> rating = data[i]['rating'];
-      Product product =
-          Product(id, title, price, description, category, image, rating);
-      list.add(product);
-    }
-
-    return list;
-  }
+  bool isWeb = false;
 
   @override
   void initState() {
     super.initState();
-    fetchProduct();
+    productService.fetchProduct(productList, isLoading).then((value) {
+      setState(() {
+        isLoading = value;
+      });
+    });
   }
 
   @override
@@ -75,10 +47,13 @@ class _ProductPageState extends State<ProductPage> {
         backgroundColor: const Color.fromARGB(255, 165, 229, 75),
         child: const Icon(Icons.shopping_cart),
         onPressed: () {
+          final StripePayment = StripePaymentService();
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const CartPage(),
+              builder: (context) => CartPage(
+                StripePaymentS: StripePayment,
+              ),
             ),
           );
         },
@@ -98,19 +73,20 @@ class _ProductPageState extends State<ProductPage> {
                     Colors.black,
                     Colors.grey[100]!,
                   ],
-                  begin: Alignment(-1.0, -0.3),
-                  end: Alignment(1.0, 0.3),
+                  begin: const Alignment(-1.0, -0.3),
+                  end: const Alignment(1.0, 0.3),
                 ),
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 200,
                       childAspectRatio: 3 / 3.5,
+                      mainAxisSpacing: 20,
                       crossAxisSpacing: 20),
-                  itemCount: 10,
+                  itemCount: 20,
                   itemBuilder: (BuildContext context, index) {
                     return Card(
                       margin: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
+                          horizontal: 30, vertical: 10),
                       elevation: 1.0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -120,91 +96,103 @@ class _ProductPageState extends State<ProductPage> {
                 ),
               )
             : Container(
-                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                child: GridView.builder(
-                    itemCount: ProductList.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 200,
-                            childAspectRatio: 3 / 3.5,
-                            mainAxisSpacing: 20,
-                            crossAxisSpacing: 20),
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                context
-                                    .read<SelectedProductList>()
-                                    .alladd(ProductList[index]);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ProductDetailPage(),
-                                  ),
-                                );
-                              },
-                              child: Hero(
-                                tag: ProductList[index].image,
-                                child: Container(
-                                  height: 120,
-                                  width: 150,
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: FadeInImage(
-                                      image: NetworkImage(
-                                          ProductList[index].image),
-                                      placeholder: const AssetImage(
-                                          "assets/images/picture.png"),
-                                      imageErrorBuilder:
-                                          (context, error, stackTrace) {
-                                        return const Icon(Icons.image);
-                                      }),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 150,
-                                      padding: const EdgeInsets.all(4),
-                                      child: ReadMoreText(
-                                        ProductList[index].title,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                        trimLines: 2,
-                                        trimMode: TrimMode.Line,
-                                      ),
+                padding: EdgeInsets.fromLTRB(20.w, 0, 0, 0),
+                child: LayoutBuilder(builder: (context, constraints) {
+                  if (constraints.maxWidth < 500) {
+                    isWeb = false;
+                  } else {
+                    isWeb = true;
+                  }
+                  return GridView.builder(
+                      itemCount: productList.length,
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: isWeb ? 200 : 200.w,
+                          childAspectRatio: 3 / 3.5,
+                          mainAxisSpacing: isWeb ? 20 : 20.h,
+                          crossAxisSpacing: isWeb ? 20 : 20.w),
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                          padding: EdgeInsets.all(8.h),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              InkWell(
+                                key: GlobalKey(
+                                    debugLabel: productList[index].image),
+                                onTap: () {
+                                  context
+                                      .read<SelectedProductList>()
+                                      .aladd(productList[index]);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ProductDetailPage(),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5),
-                                      child: Text(
-                                        "\$ ${ProductList[index].price}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 25,
-                                            color: Colors.lightGreen),
-                                      ),
-                                    )
-                                  ],
+                                  );
+                                },
+                                child: Hero(
+                                  tag: productList[index].image,
+                                  child: Container(
+                                    height: isWeb ? 90 : 90.h,
+                                    width: isWeb ? 120 : 120.w,
+                                    padding: EdgeInsets.all(10.h),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                          isWeb ? 10 : 10.r),
+                                    ),
+                                    child: FadeInImage(
+                                        image: NetworkImage(
+                                            productList[index].image),
+                                        placeholder: const AssetImage(
+                                            "assets/images/picture.png"),
+                                        imageErrorBuilder:
+                                            (context, error, stackTrace) {
+                                          return const Icon(Icons.image);
+                                        }),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: isWeb ? 150 : 150.w,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: isWeb ? 4 : 4.w),
+                                        child: ReadMoreText(
+                                          productList[index].title,
+                                          style: TextStyle(
+                                              fontSize: isWeb ? 10 : 10.sp,
+                                              fontWeight: FontWeight.bold),
+                                          trimLines: 2,
+                                          trimMode: TrimMode.Line,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: isWeb ? 5 : 5.w),
+                                        child: Text(
+                                          "\$ ${productList[index].price}",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: isWeb ? 10 : 10.sp,
+                                              color: Colors.lightGreen),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      });
+                }),
               ),
       ),
     );
